@@ -172,7 +172,7 @@ void MyTcpServer::SendToSerialPort(QString content)
     {
         //qDebug()<<"全部连接已选择";
         for(int i=0; i<tcpClient.length(); i++)
-            tcpClient[i]->write(baContent.data());
+            tcpClient[i]->write(baContent);
     }
     //指定连接
     else
