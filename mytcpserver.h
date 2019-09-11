@@ -44,6 +44,7 @@ private slots:
     void on_btnFineAdjust_clicked();
     void on_btnMesaDistanceAngle_clicked();
     void on_btnAutoLockIn_clicked();
+    void on_btnStartPowerSearch_clicked();
 };
 
 #endif // MYTCPSERVER_H

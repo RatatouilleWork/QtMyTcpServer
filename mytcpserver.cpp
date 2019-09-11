@@ -229,7 +229,7 @@ void MyTcpServer::on_btnFineAdjust_clicked()
 void MyTcpServer::on_btnMesaDistanceAngle_clicked()
 {
 
-    QString Cmd = "\r\n%R1Q,17017:1\r\n";
+    QString Cmd = "\r\n%R1Q,17017:2\r\n";
     SendToSerialPort(Cmd);
     return;
 }
@@ -240,4 +240,12 @@ void MyTcpServer::on_btnAutoLockIn_clicked()
     QString Cmd = "\r\n%R1Q,9013:\r\n";
     SendToSerialPort(Cmd);
     return;
+}
+
+void MyTcpServer::on_btnStartPowerSearch_clicked()
+{
+    QString Cmd = "\r\n%R1Q,9052:\r\n";
+    SendToSerialPort(Cmd);
+    return;
+
 }
