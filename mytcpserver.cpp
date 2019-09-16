@@ -213,15 +213,25 @@ void MyTcpServer::on_btnSetUserLockState_clicked()
     int ret = OperationSerialPort::parseReturnCode(m_recvData, m_respondHeader, m_respondData);
     if(0 == ret)
     {
-        ui->edtRecv->append("设置跟踪成功！--append");
-        edtShow("设置跟踪成功！--edtShow");
+        ui->edtRecv->append("设置跟踪成功!--append");
+        edtShow("设置跟踪成功!--edtShow");
     }
     else
     {
-        QString temp = "出现错误，错误码为: " + QString(ret) + "<<请关注后续解析！";
+        QString temp = "出现错误，错误码为: " + QString(ret) + "<<请关注后续解析!";
         edtShow(temp);
 
     }
+
+    for(auto it = m_respondData.begin(); it != m_respondData.end(); it++)
+    {
+        QString tmpString;
+        tmpString.append(*it);
+        edtShow(tmpString);
+    }
+
+    edtShow(m_respondData[0]);
+
 
 
 
