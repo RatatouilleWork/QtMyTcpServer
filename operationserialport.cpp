@@ -16,7 +16,9 @@ int OperationSerialPort::parseReturnCode(QByteArray& returnString, QList<QByteAr
     returnHeader = respond[0].split(',');
     returnData = respond[1].split(',');
 
-    return 0;
+    int ret = returnData[0].toInt();
+
+    return ret;
 }
 
 int OperationSerialPort::calcCoordination(const double radium, const double angleH, const double angleV, double& x, double& y, double& z)

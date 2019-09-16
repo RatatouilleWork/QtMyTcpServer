@@ -159,6 +159,11 @@ void MyTcpServer::on_btnSend_clicked()
     }
 }
 
+inline void MyTcpServer::edtShow(QString info)
+{
+    ui->edtRecv->append(info);
+}
+
 void MyTcpServer::on_btnClear_clicked()
 {
     ui->edtRecv->clear();
@@ -205,6 +210,21 @@ void MyTcpServer::on_btnSetUserLockState_clicked()
 {
     QString Cmd = "\r\n%R1Q,18007:1\r\n";
     SendToSerialPort(Cmd);
+    int ret = OperationSerialPort::parseReturnCode(m_recvData, m_respondHeader, m_respondData);
+    if(0 == ret)
+    {
+        ui->edtRecv->append("设置跟踪成功！--append");
+        edtShow("设置跟踪成功！--edtShow");
+    }
+    else
+    {
+        QString temp = "出现错误，错误码为: " + QString(ret) + "<<请关注后续解析！";
+        edtShow(temp);
+
+    }
+
+
+
     return;
 }
 

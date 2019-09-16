@@ -36,6 +36,7 @@ private:
 
 private:
     void SendToSerialPort(QString content);
+    inline void edtShow(QString info);
 
 private slots:
     void NewConnectionSlot();
