@@ -70,7 +70,7 @@ void MyTcpServer::ReadData()
 
         // 若此次消息的地址与上次不同，则需显示此次消息的客户端地址
         if(IP_Port != IP_Port_Pre)
-            ui->edtRecv->append(IP_Port);
+            //ui->edtRecv->append(IP_Port);
 
         ui->edtRecv->append(m_recvData);
 
