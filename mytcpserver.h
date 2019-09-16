@@ -6,6 +6,9 @@
 #include <QTcpSocket>
 #include <QNetworkInterface>
 #include <QMessageBox>
+#include "operationserialport.h"
+
+
 namespace Ui {
 class MyTcpServer;
 }
@@ -23,6 +26,11 @@ private:
     QTcpServer *tcpServer;
     QList<QTcpSocket*> tcpClient;
     QTcpSocket *currentClient;
+
+    QByteArray m_recvData;
+    QList<QByteArray> m_respond;
+    QList<QByteArray> m_respondHeader;
+    QList<QByteArray> m_respondData;
 
     QTcpSocket* dtuSocket;
 

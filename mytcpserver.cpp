@@ -1,5 +1,7 @@
 #include "mytcpserver.h"
 #include "ui_mytcpserver.h"
+#include <QList>
+#include "operationserialport.h"
 
 MyTcpServer::MyTcpServer(QWidget *parent) :
     QMainWindow(parent),
@@ -21,6 +23,7 @@ MyTcpServer::MyTcpServer(QWidget *parent) :
     ui->btnFineAdjust->setEnabled(false);
     ui->btnMesaDistanceAngle->setEnabled(false);
     ui->btnAutoLockIn->setEnabled(false);
+    ui->btnStartPowerSearch->setEnabled(false);
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(NewConnectionSlot()));
 }
 
@@ -42,6 +45,7 @@ void MyTcpServer::NewConnectionSlot()
     ui->btnFineAdjust->setEnabled(true);
     ui->btnMesaDistanceAngle->setEnabled(true);
     ui->btnAutoLockIn->setEnabled(true);
+    ui->btnStartPowerSearch->setEnabled(true);
 
     ui->cbxConnection->addItem(tr("%1:%2").arg(currentClient->peerAddress().toString().split("::ffff:")[1])\
                                           .arg(currentClient->peerPort()));
@@ -55,8 +59,9 @@ void MyTcpServer::ReadData()
     // 由于readyRead信号并未提供SocketDecriptor，所以需要遍历所有客户端
     for(int i=0; i<tcpClient.length(); i++)
     {
-        QByteArray buffer = tcpClient[i]->readAll();
-        if(buffer.isEmpty())    continue;
+        m_recvData = tcpClient[i]->readAll();
+        if(m_recvData.isEmpty())
+            continue;
 
         static QString IP_Port, IP_Port_Pre;
         qDebug()<< tcpClient[i]->peerAddress().toString();
@@ -67,7 +72,7 @@ void MyTcpServer::ReadData()
         if(IP_Port != IP_Port_Pre)
             ui->edtRecv->append(IP_Port);
 
-        ui->edtRecv->append(buffer);
+        ui->edtRecv->append(m_recvData);
 
         //更新ip_port
         IP_Port_Pre = IP_Port;
@@ -157,8 +162,8 @@ void MyTcpServer::on_btnSend_clicked()
 void MyTcpServer::on_btnClear_clicked()
 {
     ui->edtRecv->clear();
-
-}void MyTcpServer::on_Lock_clicked()
+}
+void MyTcpServer::on_Lock_clicked()
 {
 
 }
@@ -231,6 +236,24 @@ void MyTcpServer::on_btnMesaDistanceAngle_clicked()
 
     QString Cmd = "\r\n%R1Q,17017:2\r\n";
     SendToSerialPort(Cmd);
+    OperationSerialPort::parseReturnCode(m_recvData, m_respondHeader, m_respondData);
+
+    int ret = m_respondData[0].toInt();
+    if(0 != ret)
+    {
+        qDebug()<< "Error Code"<< ret;
+    }
+
+    double dH = m_respondData[1].toDouble();
+    double dV = m_respondData[2].toDouble();
+    double dDistence = m_respondData[3].toDouble();
+    quint32 dMethod = m_respondData[4].toUInt();
+
+    qDebug()<< dMethod;
+
+    double x,y,z;
+    OperationSerialPort::calcCoordination(dDistence, dV, dH, x, y, z);
+
     return;
 }
 
