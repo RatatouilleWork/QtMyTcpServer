@@ -15,9 +15,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mytcpserver.cpp \
-        operationserialport.cpp
+        operationserialport.cpp \
+        theodo.cpp
 
 HEADERS  += mytcpserver.h \
-    operationserialport.h
+    operationserialport.h \
+    theodo.h
 
 FORMS    += mytcpserver.ui

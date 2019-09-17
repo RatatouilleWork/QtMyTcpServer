@@ -2,6 +2,8 @@
 #include "ui_mytcpserver.h"
 #include <QList>
 #include "operationserialport.h"
+#include <QRegExp>
+#include <theodo.h>
 
 MyTcpServer::MyTcpServer(QWidget *parent) :
     QMainWindow(parent),
@@ -10,9 +12,10 @@ MyTcpServer::MyTcpServer(QWidget *parent) :
     ui->setupUi(this);
 
     tcpServer = new QTcpServer(this);
+    Ts60 = new Theodo(this);
     //获取本地IP:
     //ui->edtIP->setText(QNetworkInterface().allAddresses().at(1).toString());
-    ui->edtIP->setText(QString("192.168.1.46"));
+    ui->edtIP->setText(QString("127.0.0.1"));
     //设置按键：
     ui->btnConnect->setEnabled(true);
     ui->btnSend->setEnabled(false);
@@ -24,7 +27,11 @@ MyTcpServer::MyTcpServer(QWidget *parent) :
     ui->btnMesaDistanceAngle->setEnabled(false);
     ui->btnAutoLockIn->setEnabled(false);
     ui->btnStartPowerSearch->setEnabled(false);
+
+
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(NewConnectionSlot()));
+    connect(Ts60, SIGNAL(cmdSent(QString)),this, SLOT(slot_GetCmd(QString)));
+    connect(this, SIGNAL(feedbackFromTheodolite()),this, SLOT(parseFeedbackFromTheodolite()));
 }
 
 MyTcpServer::~MyTcpServer()
@@ -59,6 +66,8 @@ void MyTcpServer::ReadData()
     // 由于readyRead信号并未提供SocketDecriptor，所以需要遍历所有客户端
     for(int i=0; i<tcpClient.length(); i++)
     {
+        m_recvData.clear();
+        m_isTheodoRespond = false;
         m_recvData = tcpClient[i]->readAll();
         if(m_recvData.isEmpty())
             continue;
@@ -70,7 +79,19 @@ void MyTcpServer::ReadData()
 
         // 若此次消息的地址与上次不同，则需显示此次消息的客户端地址
         if(IP_Port != IP_Port_Pre)
-            //ui->edtRecv->append(IP_Port);
+            ui->edtRecv->append(IP_Port);
+
+        if(!QString(m_recvData).split(":").isEmpty())
+        {
+            if(QString(m_recvData).split(":")[0] == "%R1P,0,0")
+            {
+                ui->edtRecv->append("收到一条来自全站仪的反馈，即将解析");
+                emit feedbackFromTheodolite();
+            }
+
+        }
+
+
 
         ui->edtRecv->append(m_recvData);
 
@@ -208,33 +229,8 @@ void MyTcpServer::SendToSerialPort(QString content)
 
 void MyTcpServer::on_btnSetUserLockState_clicked()
 {
-    QString Cmd = "\r\n%R1Q,18007:1\r\n";
-    SendToSerialPort(Cmd);
-    int ret = OperationSerialPort::parseReturnCode(m_recvData, m_respondHeader, m_respondData);
-    if(0 == ret)
-    {
-        ui->edtRecv->append("设置跟踪成功!--append");
-        edtShow("设置跟踪成功!--edtShow");
-    }
-    else
-    {
-        QString temp = "出现错误，错误码为: " + QString(ret) + "<<请关注后续解析!";
-        edtShow(temp);
-
-    }
-
-    for(auto it = m_respondData.begin(); it != m_respondData.end(); it++)
-    {
-        QString tmpString;
-        tmpString.append(*it);
-        edtShow(tmpString);
-    }
-
-    edtShow(m_respondData[0]);
-
-
-
-
+    Ts60->AUS_SetUserLockStat(Theodo::ON);
+    SendToSerialPort(Ts60->m_Cmd);
     return;
 }
 
@@ -302,3 +298,61 @@ void MyTcpServer::on_btnStartPowerSearch_clicked()
     return;
 
 }
+
+void MyTcpServer::on_btnTestSignal_clicked()
+{
+    qDebug()<<__LINE__<<"button test signal clicked";
+    this->Ts60->testSignalEmit();
+}
+
+
+void MyTcpServer::slot_GetCmd(QString cmd)
+{
+    m_cmdName.clear();
+    m_cmdName = cmd;
+
+}
+
+void MyTcpServer::parseFeedbackFromTheodolite()
+{
+    qDebug()<<__FILE__<<__LINE__<<"parse feedback from theodolite";
+    int ret = OperationSerialPort::parseReturnCode(m_recvData, m_respondHeader, m_respondData);
+    if(-1 != ret)
+    {
+        ui->edtRecv->append(QString("发动的命令是") + m_cmdName);
+        ui->edtRecv->append(QString("解析成功，RC码为>>%1").arg(QString::number(ret)));
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

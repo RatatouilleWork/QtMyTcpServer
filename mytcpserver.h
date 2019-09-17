@@ -7,6 +7,7 @@
 #include <QNetworkInterface>
 #include <QMessageBox>
 #include "operationserialport.h"
+#include "theodo.h"
 
 
 namespace Ui {
@@ -27,12 +28,21 @@ private:
     QList<QTcpSocket*> tcpClient;
     QTcpSocket *currentClient;
 
+
+    bool m_isTheodoRespond = 0;
     QByteArray m_recvData;
+    QByteArray m_theodoRespond;
     QList<QByteArray> m_respond;
     QList<QByteArray> m_respondHeader;
     QList<QByteArray> m_respondData;
+    QString m_cmdName;
 
     QTcpSocket* dtuSocket;
+    Theodo* Ts60;
+
+
+signals:
+    void feedbackFromTheodolite();
 
 private:
     void SendToSerialPort(QString content);
@@ -54,6 +64,9 @@ private slots:
     void on_btnMesaDistanceAngle_clicked();
     void on_btnAutoLockIn_clicked();
     void on_btnStartPowerSearch_clicked();
+    void on_btnTestSignal_clicked();
+    void slot_GetCmd(QString cmd);
+    void parseFeedbackFromTheodolite();
 };
 
 #endif // MYTCPSERVER_H
