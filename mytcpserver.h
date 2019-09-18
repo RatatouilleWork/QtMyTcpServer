@@ -42,7 +42,7 @@ private:
 
 
 signals:
-    void feedbackFromTheodolite();
+    void sendFeedbackToTheodo(QString feedBack);
 
 private:
     void SendToSerialPort(QString content);
@@ -64,7 +64,6 @@ private slots:
     void on_btnMesaDistanceAngle_clicked();
     void on_btnAutoLockIn_clicked();
     void on_btnStartPowerSearch_clicked();
-    void on_btnTestSignal_clicked();
     void slot_GetCmd(QString cmd);
     void parseFeedbackFromTheodolite();
 };

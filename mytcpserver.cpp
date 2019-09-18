@@ -31,7 +31,8 @@ MyTcpServer::MyTcpServer(QWidget *parent) :
 
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(NewConnectionSlot()));
     connect(Ts60, SIGNAL(cmdSent(QString)),this, SLOT(slot_GetCmd(QString)));
-    connect(this, SIGNAL(feedbackFromTheodolite()),this, SLOT(parseFeedbackFromTheodolite()));
+    connect(this, SIGNAL(sendFeedbackToTheodo(QString)), Ts60, SLOT(getFeedBack(QString)));
+    connect(Ts60, SIGNAL(theodoReady()), this, SLOT(parseFeedbackFromTheodolite()));
 }
 
 MyTcpServer::~MyTcpServer()
@@ -86,12 +87,10 @@ void MyTcpServer::ReadData()
             if(QString(m_recvData).split(":")[0] == "%R1P,0,0")
             {
                 ui->edtRecv->append("收到一条来自全站仪的反馈，即将解析");
-                emit feedbackFromTheodolite();
+                emit sendFeedbackToTheodo(m_recvData);
             }
 
         }
-
-
 
         ui->edtRecv->append(m_recvData);
 
@@ -299,12 +298,6 @@ void MyTcpServer::on_btnStartPowerSearch_clicked()
 
 }
 
-void MyTcpServer::on_btnTestSignal_clicked()
-{
-    qDebug()<<__LINE__<<"button test signal clicked";
-    this->Ts60->testSignalEmit();
-}
-
 
 void MyTcpServer::slot_GetCmd(QString cmd)
 {
@@ -315,13 +308,35 @@ void MyTcpServer::slot_GetCmd(QString cmd)
 
 void MyTcpServer::parseFeedbackFromTheodolite()
 {
-    qDebug()<<__FILE__<<__LINE__<<"parse feedback from theodolite";
+    /*
+    qDebug()<<__LINE__<<__FILE__<<__FUNCTION__<<"parse feedback from theodolite";
     int ret = OperationSerialPort::parseReturnCode(m_recvData, m_respondHeader, m_respondData);
     if(-1 != ret)
     {
-        ui->edtRecv->append(QString("发动的命令是") + m_cmdName);
+        ui->edtRecv->append(QString("Cmd=") + m_cmdName);
         ui->edtRecv->append(QString("解析成功，RC码为>>%1").arg(QString::number(ret)));
     }
+    */
+
+    QString temp_feedback;
+    QStringList temp_feedback_header;
+    QStringList temp_feedback_data;
+
+
+    int ret = Ts60->parseFeedback();
+    if(-1 != ret)
+    {
+        ui->edtRecv->append(QString("Cmd=") + m_cmdName);
+        ui->edtRecv->append(QString("解析成功，RC码为>>%1").arg(QString::number(ret)));
+    }
+
+    Ts60->get_m_feedBack(temp_feedback);
+    Ts60->get_m_feedBackHeader(temp_feedback_header);
+    Ts60->get_m_feedBackData(temp_feedback_data);
+
+    qDebug()<<__LINE__<<__FILE__<<__FUNCTION__<<temp_feedback;
+    qDebug()<<__LINE__<<__FILE__<<__FUNCTION__<<temp_feedback_header;
+    qDebug()<<__LINE__<<__FILE__<<__FUNCTION__<<temp_feedback_data;
 
 }
 

@@ -8,17 +8,15 @@
 class Theodo : public QObject
 {
     Q_OBJECT
+
+// Constructor:
 public:
     explicit Theodo(QObject *parent = nullptr);
 
-signals:
-   void cmdSent(QString cmd);
-
-public slots:
-
+// Macros and enumerations:
 public:
 
-    // 枚举： 开关：
+    // Enumerations:
     enum _Switch
     {
         OFF = 0,
@@ -41,8 +39,7 @@ public:
         BAP_STOP_TRK = 6
     }BAP_MEASURE_PROG;
 
-public:
-    // 宏定义： 全局返回值：
+    // Macros:
     static const uint GRC_OK = 0;
     static const uint GRC_NOT_IMPL = 5;
     static const uint GRC_NA = 27;
@@ -56,9 +53,24 @@ public:
     static const uint GRC_AUT_BAD_ENVIRONMENT = 8712;
     static const uint GRC_ATA_STRANGE_LIGHT = 524;
 
+// Member properties:
+public:
     QString m_Cmd;
 
-    // Public methods:
+private:
+    QString m_feedBack;
+    QStringList m_feedbackHeader;
+    QStringList m_feedbackData;
+
+// Signals and slots:
+signals:
+   void cmdSent(QString cmd);
+   void theodoReady();
+
+public slots:
+    int getFeedBack(QString feedBack);
+
+// Theodolite functions:
 public:
     int AUS_SetUserLockStat(_Switch onSwitch);
     int AUT_SetSearchArea(double dCenterH, double dCenterV, double dRangeH, double dRangeV, _isEnable bEnable);
@@ -67,9 +79,50 @@ public:
     int AUT_LockIn();
     int BAP_MeasDistanceAngle(_BAP_MEASURE_PROG DistMode, double& angleH, double&angleV, double& distance, uint& feedbackDistMode);
 
-
-    void testSignalEmit();
+// Member methods:
+public:
+    int parseFeedback();
+    void get_m_feedBack(QString& feedBack);
+    void get_m_feedBackHeader(QStringList& feedBackHeader);
+    void get_m_feedBackData(QStringList& feedBackData);
 
 };
 
 #endif // THEODO_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
